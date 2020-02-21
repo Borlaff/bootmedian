@@ -36,34 +36,21 @@ s2_down_q = (1-sigma2)/2
 s2_up_q = 1 - s2_down_q
 s3_down_q = (1-sigma3)/2
 s3_up_q = 1 - s3_down_q
-
-def bootstrap_resample(X, weights=False):
+def bootstrap_resample(X, weights=False, seed=None):
     dataframe = pd.DataFrame(X)
-
+    print(seed)
     if not isinstance(weights, bool):
         if bn.nansum(weights) == 0:
             weights = np.ones(len(weights))
         weights = weights/np.max(weights)
         weights_pd = pd.Series(weights)
-        sample_pd = dataframe.sample(len(X), weights=weights_pd, replace=True)
+        sample_pd = dataframe.sample(len(X), weights=weights_pd, replace=True, random_state = seed)
         X_resample = np.ndarray.flatten(np.array(sample_pd))
     else:
-        sample_pd = dataframe.sample(len(X), replace=True)
+        sample_pd = dataframe.sample(len(X), replace=True, random_state = seed)
         X_resample = np.ndarray.flatten(np.array(sample_pd))
 
     return X_resample
-
-def mean_bootstrap(argument):
-    # arguments = sample, indexes, i
-    sample = argument[0]
-    weights = argument[1]
-    if (len(argument) == 3):
-        std1 = argument[2]
-        sample = np.random.normal(loc=sample, scale=std1)
-    X_resample = bootstrap_resample(X=sample, weights=weights)
-    median_boot = bn.nanmean(X_resample)
-    return mean_boot
-
 
 def median_bootstrap(argument):
     # arguments = sample, indexes, i
@@ -76,6 +63,66 @@ def median_bootstrap(argument):
     median_boot = bn.nanmedian(X_resample)
     return median_boot
 
+
+def boot_polyfit(x, y, seed):
+    index_array = np.linspace(0,len(x)-1,len(x), dtype="int")
+    index_resamp = bootstrap_resample(X=index_array, weights=False, seed=seed)
+    m_temp, b_temp = np.polyfit(x[index_resamp], y[index_resamp], 1)
+    return(np.array([m_temp, b_temp]))
+
+
+def bootfit(x, y, nsimul, errors=1):
+    m_array = np.empty(nsimul)
+    m_array[:] = np.nan
+    b_array = np.empty(nsimul)
+    b_array[:] = np.nan
+
+    boot_polyfit_results = miniutils.parallel_progbar(boot_polyfit,
+                                                      zip([x]*nsimul, [y]*nsimul, np.random.randint(0,100*nsimul,nsimul)),
+                                                      nprocs=4, starmap=True)
+    # boot_polyfit_results = miniutils.parallel_progbar(boot_polyfit, zip([muGaia]*nsimul, [muVis]*nsimul, np.random.randint(0,10*nsimul,nsimul)),
+                                                  # nprocs=4, starmap=True)
+#    for i in tqdm(range(nsimul)):
+#        index_resamp = bootstrap_resample(index_array)
+#        m_temp, b_temp = np.polyfit(x[index_array], y[index_array], 1)
+    m_array = np.array(boot_polyfit_results)[:,0]
+    b_array = np.array(boot_polyfit_results)[:,1]
+    print(m_array)
+    print(b_array)
+    
+    #print(median_boot)
+    m_median = bn.nanmedian(m_array)
+    b_median = bn.nanmedian(b_array)
+        
+    if(errors == 1):
+        m_s1_up = np.percentile(m_array, s1_up_q*100)
+        m_s1_down = np.percentile(m_array, s1_down_q*100)
+        m_s2_up = np.percentile(m_array, s2_up_q*100)
+        m_s2_down = np.percentile(m_array, s2_down_q*100)
+        m_s3_up = np.percentile(m_array, s3_up_q*100)
+        m_s3_down = np.percentile(m_array, s3_down_q*100)
+
+        b_s1_up = np.percentile(b_array, s1_up_q*100)
+        b_s1_down = np.percentile(b_array, s1_down_q*100)
+        b_s2_up = np.percentile(b_array, s2_up_q*100)
+        b_s2_down = np.percentile(b_array, s2_down_q*100)
+        b_s3_up = np.percentile(b_array, s3_up_q*100)
+        b_s3_down = np.percentile(b_array, s3_down_q*100)
+        
+    if(errors == 0):
+        s1_up = 0
+        s1_down = 0
+        s2_up = 0
+        s2_down = 0
+        s3_up = 0
+        s3_down = 0
+
+    output = {"m_median": m_median, "m_s1_up": m_s1_up, "m_s1_down": m_s1_down,
+              "m_s2_up": m_s2_up, "m_s2_down": m_s2_down, "m_s3_up": m_s3_up,
+              "m_s3_down": m_s3_down, "b_median": b_median, "b_s1_up": b_s1_up,
+              "b_s1_down": b_s1_down, "b_s2_up": b_s2_up, "b_s2_down": b_s2_down, 
+              "b_s3_up": b_s3_up, "b_s3_down": b_s3_down, }
+    return(output)
 
 def bootmedian(sample_input, nsimul=1000, weights=False, errors=1, std=False, verbose=False, nthreads=7, mode="median"):
     if verbose:
