@@ -26,6 +26,13 @@ import multiprocessing
 import bottleneck as bn
 import pandas as pd
 
+import os
+from tqdm import tqdm
+from astropy.io import fits
+import matplotlib.pyplot as plt
+import bottleneck as bn
+import miniutils
+
 sigma1 = 0.682689492137086
 sigma2 = 0.954499736103642
 sigma3 = 0.997300203936740
@@ -36,9 +43,10 @@ s2_down_q = (1-sigma2)/2
 s2_up_q = 1 - s2_down_q
 s3_down_q = (1-sigma3)/2
 s3_up_q = 1 - s3_down_q
+
+
 def bootstrap_resample(X, weights=False, seed=None):
     dataframe = pd.DataFrame(X)
-    print(seed)
     if not isinstance(weights, bool):
         if bn.nansum(weights) == 0:
             weights = np.ones(len(weights))
@@ -62,6 +70,31 @@ def median_bootstrap(argument):
     X_resample = bootstrap_resample(X=sample, weights=weights)
     median_boot = bn.nanmedian(X_resample)
     return median_boot
+
+
+def mean_bootstrap(argument):
+    # arguments = sample, indexes, i
+    sample = argument[0]
+    weights = argument[1]
+    if (len(argument) == 3):
+        std1 = argument[2]
+        sample = np.random.normal(loc=sample, scale=std1)
+    X_resample = bootstrap_resample(X=sample, weights=weights)
+    median_boot = bn.nanmean(X_resample)
+    return median_boot
+
+
+def std_bootstrap(argument):
+    # arguments = sample, indexes, i
+    sample = argument[0]
+    weights = argument[1]
+    if (len(argument) == 3):
+        std1 = argument[2]
+        sample = np.random.normal(loc=sample, scale=std1)
+    X_resample = bootstrap_resample(X=sample, weights=weights)
+    median_boot = bn.nanstd(X_resample)
+    return median_boot
+
 
 
 def boot_polyfit(x, y, seed):
@@ -89,11 +122,11 @@ def bootfit(x, y, nsimul, errors=1):
     b_array = np.array(boot_polyfit_results)[:,1]
     print(m_array)
     print(b_array)
-    
+
     #print(median_boot)
     m_median = bn.nanmedian(m_array)
     b_median = bn.nanmedian(b_array)
-        
+
     if(errors == 1):
         m_s1_up = np.percentile(m_array, s1_up_q*100)
         m_s1_down = np.percentile(m_array, s1_down_q*100)
@@ -108,7 +141,7 @@ def bootfit(x, y, nsimul, errors=1):
         b_s2_down = np.percentile(b_array, s2_down_q*100)
         b_s3_up = np.percentile(b_array, s3_up_q*100)
         b_s3_down = np.percentile(b_array, s3_down_q*100)
-        
+
     if(errors == 0):
         s1_up = 0
         s1_down = 0
@@ -120,9 +153,10 @@ def bootfit(x, y, nsimul, errors=1):
     output = {"m_median": m_median, "m_s1_up": m_s1_up, "m_s1_down": m_s1_down,
               "m_s2_up": m_s2_up, "m_s2_down": m_s2_down, "m_s3_up": m_s3_up,
               "m_s3_down": m_s3_down, "b_median": b_median, "b_s1_up": b_s1_up,
-              "b_s1_down": b_s1_down, "b_s2_up": b_s2_up, "b_s2_down": b_s2_down, 
+              "b_s1_down": b_s1_down, "b_s2_up": b_s2_up, "b_s2_down": b_s2_down,
               "b_s3_up": b_s3_up, "b_s3_down": b_s3_down, }
     return(output)
+
 
 def bootmedian(sample_input, nsimul=1000, weights=False, errors=1, std=False, verbose=False, nthreads=7, mode="median"):
     if verbose:
@@ -187,10 +221,15 @@ def bootmedian(sample_input, nsimul=1000, weights=False, errors=1, std=False, ve
 
         if verbose:
             print("A total of "+str(num_cores)+" workers joined the cluster!")
-        print("A total of "+str(num_cores)+" workers joined the cluster!")
 
         pool = multiprocessing.Pool(processes=num_cores)
-        median_boot = pool.map(median_bootstrap, arguments)
+        if mode == "median":
+            median_boot = pool.map(median_bootstrap, arguments)
+        if mode == "mean":
+            median_boot = pool.map(mean_bootstrap, arguments) 
+        if mode == "std":
+            median_boot = pool.map(std_bootstrap, arguments) 
+
         pool.terminate()
 
     else:
@@ -201,12 +240,18 @@ def bootmedian(sample_input, nsimul=1000, weights=False, errors=1, std=False, ve
                 median_boot[i] = median_bootstrap(arguments[i])
             if mode=="mean":
                 median_boot[i] = mean_bootstrap(arguments[i])
+            if mode=="std":
+                median_boot[i] = mean_bootstrap(arguments[i])
+
 
     #print(median_boot)
     if mode=="median":
         median = bn.nanmedian(median_boot)
     if mode=="mean":
         median = bn.nanmean(median_boot)
+    if mode=="std":
+        median = bn.nanmedian(median_boot)
+
 
     if(errors == 1):
         s1_up = np.percentile(median_boot, s1_up_q*100)
