@@ -226,9 +226,9 @@ def bootmedian(sample_input, nsimul=1000, weights=False, errors=1, std=False, ve
         if mode == "median":
             median_boot = pool.map(median_bootstrap, arguments)
         if mode == "mean":
-            median_boot = pool.map(mean_bootstrap, arguments) 
+            median_boot = pool.map(mean_bootstrap, arguments)
         if mode == "std":
-            median_boot = pool.map(std_bootstrap, arguments) 
+            median_boot = pool.map(std_bootstrap, arguments)
 
         pool.terminate()
 
