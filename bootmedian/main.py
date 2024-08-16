@@ -22,7 +22,7 @@ Output: The output is a len(output) = 7 array.
 """
 
 import numpy as np
-import multiprocessing
+import multiprocess
 import bottleneck as bn
 import pandas as pd
 
@@ -30,8 +30,6 @@ import os
 from tqdm import tqdm
 from astropy.io import fits
 import matplotlib.pyplot as plt
-import bottleneck as bn
-import miniutils
 
 sigma1 = 0.682689492137086
 sigma2 = 0.954499736103642
@@ -110,16 +108,19 @@ def bootfit(x, y, nsimul, errors=1):
     b_array = np.empty(nsimul)
     b_array[:] = np.nan
 
-    boot_polyfit_results = miniutils.parallel_progbar(boot_polyfit,
-                                                      zip([x]*nsimul, [y]*nsimul, np.random.randint(0,100*nsimul,nsimul)),
-                                                      nprocs=4, starmap=True)
+    # boot_polyfit_results = miniutils.parallel_progbar(boot_polyfit,
+    #                                                  zip([x]*nsimul, [y]*nsimul, np.random.randint(0,100*nsimul,nsimul)),
+    #                                                  nprocs=4, starmap=True)
     # boot_polyfit_results = miniutils.parallel_progbar(boot_polyfit, zip([muGaia]*nsimul, [muVis]*nsimul, np.random.randint(0,10*nsimul,nsimul)),
-                                                  # nprocs=4, starmap=True)
-#    for i in tqdm(range(nsimul)):
-#        index_resamp = bootstrap_resample(index_array)
-#        m_temp, b_temp = np.polyfit(x[index_array], y[index_array], 1)
-    m_array = np.array(boot_polyfit_results)[:,0]
-    b_array = np.array(boot_polyfit_results)[:,1]
+
+    m_array = np.zeros(nsimul)
+    b_array = np.zeros(nsimul)
+    index_array = np.linspace(0, len(x)-1, len(x)).astype("int")                                           # nprocs=4, starmap=True)
+    for i in tqdm(range(nsimul)):
+        index_resamp = bootstrap_resample(index_array)
+        m_array[i], b_array[i] = np.polyfit(x[index_array], y[index_array], 1)
+    #m_array = np.array(boot_polyfit_results)[:,0]
+    #b_array = np.array(boot_polyfit_results)[:,1]
     print(m_array)
     print(b_array)
 
@@ -212,8 +213,8 @@ def bootmedian(sample_input, nsimul=1000, weights=False, errors=1, std=False, ve
 
     #return(arguments)
     if nthreads != 1:
-        if multiprocessing.cpu_count() > 1:
-            num_cores = multiprocessing.cpu_count() - 1
+        if multiprocess.cpu_count() > 1:
+            num_cores = multiprocess.cpu_count() - 1
         else:
             num_cores = 1
         #if multiprocessing.cpu_count() > 8:
@@ -222,7 +223,7 @@ def bootmedian(sample_input, nsimul=1000, weights=False, errors=1, std=False, ve
         if verbose:
             print("A total of "+str(num_cores)+" workers joined the cluster!")
 
-        pool = multiprocessing.Pool(processes=num_cores)
+        pool = multiprocess.Pool(processes=num_cores)
         if mode == "median":
             median_boot = pool.map(median_bootstrap, arguments)
         if mode == "mean":

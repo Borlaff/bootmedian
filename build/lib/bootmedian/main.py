@@ -30,8 +30,6 @@ import os
 from tqdm import tqdm
 from astropy.io import fits
 import matplotlib.pyplot as plt
-import bottleneck as bn
-import miniutils
 
 sigma1 = 0.682689492137086
 sigma2 = 0.954499736103642
@@ -110,16 +108,18 @@ def bootfit(x, y, nsimul, errors=1):
     b_array = np.empty(nsimul)
     b_array[:] = np.nan
 
-    boot_polyfit_results = miniutils.parallel_progbar(boot_polyfit,
-                                                      zip([x]*nsimul, [y]*nsimul, np.random.randint(0,100*nsimul,nsimul)),
-                                                      nprocs=4, starmap=True)
+    # boot_polyfit_results = miniutils.parallel_progbar(boot_polyfit,
+    #                                                  zip([x]*nsimul, [y]*nsimul, np.random.randint(0,100*nsimul,nsimul)),
+    #                                                  nprocs=4, starmap=True)
     # boot_polyfit_results = miniutils.parallel_progbar(boot_polyfit, zip([muGaia]*nsimul, [muVis]*nsimul, np.random.randint(0,10*nsimul,nsimul)),
-                                                  # nprocs=4, starmap=True)
-#    for i in tqdm(range(nsimul)):
-#        index_resamp = bootstrap_resample(index_array)
-#        m_temp, b_temp = np.polyfit(x[index_array], y[index_array], 1)
-    m_array = np.array(boot_polyfit_results)[:,0]
-    b_array = np.array(boot_polyfit_results)[:,1]
+
+    m_array = np.zeros(nsimul)
+    b_array = np.zeros(nsimul)                                              # nprocs=4, starmap=True)
+    for i in tqdm(range(nsimul)):
+        index_resamp = bootstrap_resample(index_array)
+        m_array[i], b_array[i] = np.polyfit(x[index_array], y[index_array], 1)
+    #m_array = np.array(boot_polyfit_results)[:,0]
+    #b_array = np.array(boot_polyfit_results)[:,1]
     print(m_array)
     print(b_array)
 
