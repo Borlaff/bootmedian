@@ -286,7 +286,7 @@ def bootmedian(sample_input, nsimul=1000, weights=False, errors=1, std=False, ve
 
     output = {"median": median, "s1_up": s1_up, "s1_down": s1_down,
               "s2_up": s2_up, "s2_down": s2_down, "s3_up": s3_up,
-              "s3_down": s3_down, "std1_up": std1_up, "std1_down": std1_down}
+              "s3_down": s3_down, "std1_up": std1_up, "std1_down": std1_down, "sims": median_boot}
 #    return(np.array([median, s1_up, s1_down, s2_up, s2_down, s3_up, s3_down,
 #                     std1_up, std1_down]))
 
