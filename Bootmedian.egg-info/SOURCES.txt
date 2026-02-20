@@ -1,5 +1,6 @@
 LICENSE.md
 README.md
+pyproject.toml
 setup.py
 Bootmedian.egg-info/PKG-INFO
 Bootmedian.egg-info/SOURCES.txt

@@ -1,15 +1,17 @@
-Metadata-Version: 2.1
+Metadata-Version: 2.4
 Name: Bootmedian
 Version: 1.0.0
 Summary: A software to estimate medians through Bootstrapping
 Home-page: https://github.com/Borlaff/bootmedian
 Author: Alejandro S. Borlaff
-Author-email: a.s.borlaff@nasa.gov
+Author-email: "Alejandro S. Borlaff" <a.s.borlaff@nasa.gov>
 License: BSD
-Keywords: Statistics / Bootstrapping
+Project-URL: Homepage, https://github.com/Borlaff/bootmedian
+Keywords: Statistics,Bootstrapping
 Classifier: Development Status :: 3 - Alpha
 Classifier: Topic :: Utilities
 Classifier: License :: OSI Approved :: BSD License
+Description-Content-Type: text/markdown
 License-File: LICENSE.md
 Requires-Dist: numpy==1.26.4
 Requires-Dist: multiprocess
@@ -19,6 +21,9 @@ Requires-Dist: tqdm
 Requires-Dist: astropy
 Requires-Dist: matplotlib
 Requires-Dist: miniutils
+Dynamic: author
+Dynamic: home-page
+Dynamic: license-file
 
 """
 Bootmedian: A program to calculate robust median by using bootstrapping

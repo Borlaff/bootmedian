@@ -82,6 +82,17 @@ def mean_bootstrap(argument):
     return median_boot
 
 
+def sum_bootstrap(argument):
+    # arguments = sample, indexes, i
+    sample = argument[0]
+    weights = argument[1]
+    if (len(argument) == 3):
+        std1 = argument[2]
+        sample = np.random.normal(loc=sample, scale=std1)
+    X_resample = bootstrap_resample(X=sample, weights=weights)
+    sum_boot = bn.nansum(X_resample)
+    return sum_boot
+
 def std_bootstrap(argument):
     # arguments = sample, indexes, i
     sample = argument[0]
@@ -230,6 +241,8 @@ def bootmedian(sample_input, nsimul=1000, weights=False, errors=1, std=False, ve
             median_boot = pool.map(mean_bootstrap, arguments)
         if mode == "std":
             median_boot = pool.map(std_bootstrap, arguments)
+        if mode == "sum":
+            median_boot = pool.map(sum_bootstrap, arguments)
 
         pool.terminate()
 
@@ -243,6 +256,8 @@ def bootmedian(sample_input, nsimul=1000, weights=False, errors=1, std=False, ve
                 median_boot[i] = mean_bootstrap(arguments[i])
             if mode=="std":
                 median_boot[i] = mean_bootstrap(arguments[i])
+            if mode=="sum":
+                median_boot[i] = sum_bootstrap(arguments[i])
 
 
     #print(median_boot)
@@ -251,6 +266,8 @@ def bootmedian(sample_input, nsimul=1000, weights=False, errors=1, std=False, ve
     if mode=="mean":
         median = bn.nanmean(median_boot)
     if mode=="std":
+        median = bn.nanmedian(median_boot)
+    if mode=="sum":
         median = bn.nanmedian(median_boot)
 
 

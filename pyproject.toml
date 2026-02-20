@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Bootmedian"
+version = "1.0.0"
+description = "A software to estimate medians through Bootstrapping"
+readme = "README.md"
+license = { text = "BSD" }
+authors = [ { name = "Alejandro S. Borlaff", email = "a.s.borlaff@nasa.gov" } ]
+keywords = ["Statistics", "Bootstrapping"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Topic :: Utilities",
+  "License :: OSI Approved :: BSD License",
+]
+dependencies = [
+  "numpy==1.26.4",
+  "multiprocess",
+  "bottleneck",
+  "pandas",
+  "tqdm",
+  "astropy",
+  "matplotlib",
+  "miniutils",
+]
+
+[project.urls]
+Homepage = "https://github.com/Borlaff/bootmedian"
