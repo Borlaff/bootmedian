@@ -74,7 +74,16 @@ def bootstrap_resample(X, weights=False, seed=None):
     return X_resample
 
 def median_bootstrap(argument):
-    # arguments = sample, indexes, i
+    ''' Calculates the median of a bootstrap resampled array. 
+     Parameters
+     ----------
+        argument : list
+            A list containing the sample, weights and optionally the std for the sample.
+      
+      Returns
+      -------
+        returns the median of a bootstrap resampled array_like'''
+    
     sample = argument[0]
     weights = argument[1]
     if (len(argument) == 3):
@@ -86,7 +95,15 @@ def median_bootstrap(argument):
 
 
 def mean_bootstrap(argument):
-    # arguments = sample, indexes, i
+    ''' Calculates the mean of a bootstrap resampled array. 
+     Parameters
+     ----------
+        argument : list
+            A list containing the sample, weights and optionally the std for the sample.
+      
+      Returns
+      -------
+        returns the mean of a bootstrap resampled array_like'''
     sample = argument[0]
     weights = argument[1]
     if (len(argument) == 3):
@@ -98,7 +115,15 @@ def mean_bootstrap(argument):
 
 
 def sum_bootstrap(argument):
-    # arguments = sample, indexes, i
+    ''' Calculates the sum of a bootstrap resampled array.
+     Parameters
+     ----------
+        argument : list
+            A list containing the sample, weights and optionally the std for the sample.
+      
+      Returns
+      -------
+        returns the sum of a bootstrap resampled array_like'''
     sample = argument[0]
     weights = argument[1]
     if (len(argument) == 3):
@@ -109,7 +134,16 @@ def sum_bootstrap(argument):
     return sum_boot
 
 def std_bootstrap(argument):
-    # arguments = sample, indexes, i
+    ''' Calculates the std of a bootstrap resampled array.
+     Parameters
+     ----------
+        argument : list
+            A list containing the sample, weights and optionally the std for the sample.
+            
+        Returns
+        -------
+        returns the std of a bootstrap resampled array_like'''
+
     sample = argument[0]
     weights = argument[1]
     if (len(argument) == 3):
@@ -122,6 +156,20 @@ def std_bootstrap(argument):
 
 
 def boot_polyfit(x, y, seed):
+    ''' Performs a linear fit of x and y using bootstrapping, returning the probability distributions 
+     of the slope and intercept.  
+     Parameters
+     ----------
+        x : array_like
+            The x values for the linear fit.
+        y : array_like
+            The y values for the linear fit.
+        seed : int
+            Random seed for reproducibility. Default is None.
+      
+      Returns
+      -------
+        returns the slope and intercept of a bootstrap resampled array_like'''
     index_array = np.linspace(0,len(x)-1,len(x), dtype="int")
     index_resamp = bootstrap_resample(X=index_array, weights=False, seed=seed)
     m_temp, b_temp = np.polyfit(x[index_resamp], y[index_resamp], 1)
