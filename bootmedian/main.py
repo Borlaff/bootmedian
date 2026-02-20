@@ -44,6 +44,21 @@ s3_up_q = 1 - s3_down_q
 
 
 def bootstrap_resample(X, weights=False, seed=None):
+    ''' Bootstrap resample an array_like data.
+
+    Parameters
+    ----------
+        X : array_like
+            data to resample
+        weights : array_like, optional
+        seed : int, optional
+            Random seed for reproducibility. Default is None.
+      
+      Returns
+      -------
+        returns a bootstrap resampled array_like
+    '''
+
     dataframe = pd.DataFrame(X)
     if not isinstance(weights, bool):
         if bn.nansum(weights) == 0:
