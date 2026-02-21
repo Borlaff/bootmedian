@@ -57,7 +57,7 @@ Example: compute the bootstrapped median and 1/2/3σ intervals for a sample:
 
 ```python
 import numpy as np
-from bootmedian.main import bootmedian
+from bootmedian import bootmedian
 
 data = np.array([1.0, 2.1, 2.3, np.nan, 3.5, 2.0])
 result = bootmedian(data, nsimul=2000, errors=1, verbose=True)
