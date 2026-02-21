@@ -8,4 +8,4 @@ Bootmedian.egg-info/dependency_links.txt
 Bootmedian.egg-info/requires.txt
 Bootmedian.egg-info/top_level.txt
 bootmedian/__init__.py
-bootmedian/main.py
+bootmedian/bootmedian.py

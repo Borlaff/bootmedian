@@ -75,6 +75,80 @@ result_w = bootmedian(data, nsimul=2000, weights=weights)
 Change the statistic with `mode` ("median", "mean", "std", "sum"):
 
 ```python
+# Bootmedian
+
+Bootmedian estimates robust statistics (median, mean, sum, std) via
+bootstrapping and returns confidence intervals for the estimates.
+
+This package provides utilities centered on the `bootmedian()` function in
+`bootmedian/bootmedian.py` to compute bootstrapped statistics and an API to run
+bootstrap-based linear fits.
+
+Highlights
+
+- Robust medians: estimate medians using bootstrap resampling.
+- Confidence intervals: returns 1σ, 2σ and 3σ up/down limits for estimates.
+- Multiple modes: compute `median`, `mean`, `std` or `sum` via the `mode` argument.
+- Weighted resampling: supports sample weights in resampling.
+
+Table of contents
+
+- Overview
+- Installation
+- Quickstart
+- API reference
+- Notes & contact
+
+Overview
+
+`bootmedian()` takes a 1-D array-like input and performs `nsimul` bootstrap
+resamples. By default it computes the median of each resample and returns the
+median of that distribution together with percentile-based confidence intervals
+for 1σ, 2σ and 3σ. NaN values in the input are ignored.
+
+Typical return (dictionary)
+
+- `median`: median of the bootstrap distribution (or mean/std/sum depending on `mode`).
+- `s1_up`, `s1_down`: 1σ upward and downward limits (percentiles).
+- `s2_up`, `s2_down`: 2σ limits.
+- `s3_up`, `s3_down`: 3σ limits.
+- `std1_up`, `std1_down`: optional percentiles of the raw sample (if `std` provided).
+- `sims`: the full bootstrap simulation array (useful for diagnostics).
+
+Installation
+
+Requirements: Python 3.8+ and the dependencies listed in `setup.py` / `pyproject.toml`.
+
+Install in editable (development) mode from the project root:
+
+```bash
+pip install -e .
+```
+
+Quickstart
+
+Example: compute the bootstrapped median and 1/2/3σ intervals for a sample:
+
+```python
+import numpy as np
+from bootmedian import bootmedian
+
+data = np.array([1.0, 2.1, 2.3, np.nan, 3.5, 2.0])
+result = bootmedian(data, nsimul=2000, errors=1, verbose=True)
+print(result)
+# -> dict with keys: 'median','s1_up','s1_down',...,'sims'
+```
+
+Using weights:
+
+```python
+weights = np.array([1, 1, 2, 1, 1, 1.5])
+result_w = bootmedian(data, nsimul=2000, weights=weights)
+```
+
+Change the statistic with `mode` ("median", "mean", "std", "sum"):
+
+```python
 mean_result = bootmedian(data, nsimul=1500, mode="mean")
 ```
 
@@ -85,7 +159,7 @@ Use `bootfit(x, y, nsimul)` to obtain bootstrap distributions for slope
 confidence percentiles for `m` and `b`.
 
 ```python
-from bootmedian.main import bootfit
+from bootmedian import bootfit
 
 x = np.linspace(0, 10, 20)
 y = 2.3*x + 1.5 + np.random.normal(scale=0.5, size=x.size)
@@ -93,55 +167,32 @@ fit = bootfit(x, y, nsimul=1000)
 print(fit['m_median'], fit['b_median'])
 ```
 
-API Reference (short)
+API reference (short)
 
-- `bootstrap_resample(X, weights=False, seed=None)`:
-        - Resamples an array-like `X` with optional `weights` (weighted sampling).
-        - Returns a flattened numpy array with one bootstrap resample.
-
-- `median_bootstrap(argument)` / `mean_bootstrap(argument)` / `sum_bootstrap(argument)` / `std_bootstrap(argument)`:
-        - Internal helpers used by `bootmedian` when running parallel workers.
-        - `argument` is a tuple/list: `(sample, weights, std)` where `std` is optional.
-
-- `boot_polyfit(x, y, seed)`:
-        - Performs a single resampled linear fit and returns `[slope, intercept]`.
-
-- `bootfit(x, y, nsimul, errors=1)`:
-        - Runs `nsimul` bootstrap fits (currently single-threaded loop with progress).
-        - Returns a dict with medians and percentile confidence intervals for `m` and `b`.
-
-- `bootmedian(sample_input, nsimul=1000, weights=False, errors=1, std=False, verbose=False, nthreads=7, mode="median")`:
-        - `sample_input`: array-like input (NaNs are ignored)
-        - `nsimul`: number of bootstrap resamples (increase gradually to avoid freezing)
-        - `weights`: False or array-like of same length as `sample_input`
-        - `errors`: 1 (full 1/2/3σ), 0 (no errors, zeros), or 0.5 (only 1σ)
-        - `std`: False or array-like; when provided the returned `std1_up/std1_down` are set
-        - `verbose`: print progress/info
-        - `nthreads`: number of worker threads; uses `multiprocess` to parallelize when >1
-        - `mode`: one of `median`, `mean`, `std`, `sum`
+- `bootstrap_resample(X, weights=False, seed=None)` — Resamples an array-like `X` with optional `weights` (weighted sampling). Returns a flattened numpy array with one bootstrap resample.
+- `median_bootstrap(argument)` / `mean_bootstrap(argument)` / `sum_bootstrap(argument)` / `std_bootstrap(argument)` — Internal helpers used by `bootmedian` when running parallel workers. `argument` is a tuple/list: `(sample, weights, std)` where `std` is optional.
+- `boot_polyfit(x, y, seed)` — Performs a single resampled linear fit and returns `[slope, intercept]`.
+- `bootfit(x, y, nsimul, errors=1)` — Runs `nsimul` bootstrap fits (currently single-threaded loop with progress). Returns a dict with medians and percentile confidence intervals for `m` and `b`.
+- `bootmedian(sample_input, nsimul=1000, weights=False, errors=1, std=False, verbose=False, nthreads=7, mode="median")` — Main function; see docstring in code for parameter details.
 
 Notes & recommendations
 
-- The function uses `bottleneck` and `pandas.DataFrame.sample` for resampling.
-- For reproducibility you can set `numpy.random.seed(...)` before calling routines
-        that internally use randomness. Some helper functions accept a `seed`.
-- `nsimul` controls accuracy vs runtime: start with a few hundred simulations, then
-        increase to a few thousand if you need tighter percentiles.
+- The implementation uses `bottleneck` and `pandas.DataFrame.sample` for resampling.
+- For reproducibility you can set `numpy.random.seed(...)` before calling routines that internally use randomness. Some helper functions accept a `seed`.
+- `nsimul` controls accuracy vs runtime: start with a few hundred simulations, then increase to a few thousand if you need tighter percentiles.
 - If your input contains many NaNs ensure weights (if provided) align with non-NaN entries.
 
-Development & Tests
+Development & tests
 
 - See `setup.py` and `pyproject.toml` for declared dependencies.
-- Run simple checks locally by importing `bootmedian.main` and running the
-        example snippets above.
+- A small example is available at `examples/simple_example.py` — run it after installing dependencies with `pip install -e .`.
 
-License & Contact
+License & contact
 
 This project is released under the BSD license (see `setup.py` for metadata).
 Author: Alejandro S. Borlaff <a.s.borlaff@nasa.gov>
 
 ---
 
-If you'd like, I can also add a short example script under `examples/` and
-run a quick sanity test to confirm the installed package imports correctly.
+If you'd like, I can add a short `examples/` notebook or a `requirements.txt` and run a quick sanity test to confirm imports.
 
