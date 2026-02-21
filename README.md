@@ -193,6 +193,3 @@ This project is released under the BSD license (see `setup.py` for metadata).
 Author: Alejandro S. Borlaff <a.s.borlaff@nasa.gov>
 
 ---
-
-If you'd like, I can add a short `examples/` notebook or a `requirements.txt` and run a quick sanity test to confirm imports.
-
