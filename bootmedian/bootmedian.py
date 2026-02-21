@@ -312,15 +312,17 @@ def bootmedian(sample_input, nsimul=1000, weights=False, errors=1, std=False, ve
     else:
         median_boot = np.zeros(nsimul)
         median_boot[:] = np.nan
-        for i in range(nsimul):
+        i = 0
+        for argument in arguments:
             if mode=="median":
-                median_boot[i] = median_bootstrap(arguments[i])
+                median_boot[i] = median_bootstrap(argument)
             if mode=="mean":
-                median_boot[i] = mean_bootstrap(arguments[i])
+                median_boot[i] = mean_bootstrap(argument)
             if mode=="std":
-                median_boot[i] = mean_bootstrap(arguments[i])
+                median_boot[i] = std_bootstrap(argument)
             if mode=="sum":
-                median_boot[i] = sum_bootstrap(arguments[i])
+                median_boot[i] = sum_bootstrap(argument)
+            i = i + 1
 
 
     #print(median_boot)

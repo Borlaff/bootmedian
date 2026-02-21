@@ -10,4 +10,4 @@ __author_email__ = "a.s.borlaff@nasa.gov"
 __description__ = "A software to estimate the median using bootstrapping"
 __url__ = "https://github.com/Borlaff/bootmedian"
 
-import bootmedian.main
+import bootmedian.bootmedian

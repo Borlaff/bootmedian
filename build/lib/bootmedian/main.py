@@ -44,6 +44,21 @@ s3_up_q = 1 - s3_down_q
 
 
 def bootstrap_resample(X, weights=False, seed=None):
+    ''' Bootstrap resample an array_like data.
+
+    Parameters
+    ----------
+        X : array_like
+            data to resample
+        weights : array_like, optional
+        seed : int, optional
+            Random seed for reproducibility. Default is None.
+      
+      Returns
+      -------
+        returns a bootstrap resampled array_like
+    '''
+
     dataframe = pd.DataFrame(X)
     if not isinstance(weights, bool):
         if bn.nansum(weights) == 0:
@@ -59,7 +74,16 @@ def bootstrap_resample(X, weights=False, seed=None):
     return X_resample
 
 def median_bootstrap(argument):
-    # arguments = sample, indexes, i
+    ''' Calculates the median of a bootstrap resampled array. 
+     Parameters
+     ----------
+        argument : list
+            A list containing the sample, weights and optionally the std for the sample.
+      
+      Returns
+      -------
+        returns the median of a bootstrap resampled array_like'''
+    
     sample = argument[0]
     weights = argument[1]
     if (len(argument) == 3):
@@ -71,7 +95,15 @@ def median_bootstrap(argument):
 
 
 def mean_bootstrap(argument):
-    # arguments = sample, indexes, i
+    ''' Calculates the mean of a bootstrap resampled array. 
+     Parameters
+     ----------
+        argument : list
+            A list containing the sample, weights and optionally the std for the sample.
+      
+      Returns
+      -------
+        returns the mean of a bootstrap resampled array_like'''
     sample = argument[0]
     weights = argument[1]
     if (len(argument) == 3):
@@ -82,8 +114,36 @@ def mean_bootstrap(argument):
     return median_boot
 
 
+def sum_bootstrap(argument):
+    ''' Calculates the sum of a bootstrap resampled array.
+     Parameters
+     ----------
+        argument : list
+            A list containing the sample, weights and optionally the std for the sample.
+      
+      Returns
+      -------
+        returns the sum of a bootstrap resampled array_like'''
+    sample = argument[0]
+    weights = argument[1]
+    if (len(argument) == 3):
+        std1 = argument[2]
+        sample = np.random.normal(loc=sample, scale=std1)
+    X_resample = bootstrap_resample(X=sample, weights=weights)
+    sum_boot = bn.nansum(X_resample)
+    return sum_boot
+
 def std_bootstrap(argument):
-    # arguments = sample, indexes, i
+    ''' Calculates the std of a bootstrap resampled array.
+     Parameters
+     ----------
+        argument : list
+            A list containing the sample, weights and optionally the std for the sample.
+            
+        Returns
+        -------
+        returns the std of a bootstrap resampled array_like'''
+
     sample = argument[0]
     weights = argument[1]
     if (len(argument) == 3):
@@ -96,6 +156,20 @@ def std_bootstrap(argument):
 
 
 def boot_polyfit(x, y, seed):
+    ''' Performs a linear fit of x and y using bootstrapping, returning the probability distributions 
+     of the slope and intercept.  
+     Parameters
+     ----------
+        x : array_like
+            The x values for the linear fit.
+        y : array_like
+            The y values for the linear fit.
+        seed : int
+            Random seed for reproducibility. Default is None.
+      
+      Returns
+      -------
+        returns the slope and intercept of a bootstrap resampled array_like'''
     index_array = np.linspace(0,len(x)-1,len(x), dtype="int")
     index_resamp = bootstrap_resample(X=index_array, weights=False, seed=seed)
     m_temp, b_temp = np.polyfit(x[index_resamp], y[index_resamp], 1)
@@ -230,6 +304,8 @@ def bootmedian(sample_input, nsimul=1000, weights=False, errors=1, std=False, ve
             median_boot = pool.map(mean_bootstrap, arguments)
         if mode == "std":
             median_boot = pool.map(std_bootstrap, arguments)
+        if mode == "sum":
+            median_boot = pool.map(sum_bootstrap, arguments)
 
         pool.terminate()
 
@@ -243,6 +319,8 @@ def bootmedian(sample_input, nsimul=1000, weights=False, errors=1, std=False, ve
                 median_boot[i] = mean_bootstrap(arguments[i])
             if mode=="std":
                 median_boot[i] = mean_bootstrap(arguments[i])
+            if mode=="sum":
+                median_boot[i] = sum_bootstrap(arguments[i])
 
 
     #print(median_boot)
@@ -251,6 +329,8 @@ def bootmedian(sample_input, nsimul=1000, weights=False, errors=1, std=False, ve
     if mode=="mean":
         median = bn.nanmean(median_boot)
     if mode=="std":
+        median = bn.nanmedian(median_boot)
+    if mode=="sum":
         median = bn.nanmedian(median_boot)
 
 
