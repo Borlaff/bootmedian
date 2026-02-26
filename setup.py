@@ -11,7 +11,7 @@ def read(fname):
 
 setup(
     name = "Bootmedian",
-    version = "1.0.0",
+    version = "1.1.3",
     author = "Alejandro S. Borlaff",
     author_email = "a.s.borlaff@nasa.gov",
     description = ("A software to estimate medians through Bootstrapping"),

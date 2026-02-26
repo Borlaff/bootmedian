@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: Bootmedian
-Version: 1.1.2
+Version: 1.1.3
 Summary: A software to estimate medians through Bootstrapping
 Home-page: https://github.com/Borlaff/bootmedian
 Author: Alejandro S. Borlaff
@@ -13,7 +13,7 @@ Classifier: Topic :: Utilities
 Classifier: License :: OSI Approved :: BSD License
 Description-Content-Type: text/markdown
 License-File: LICENSE.md
-Requires-Dist: numpy==1.26.4
+Requires-Dist: numpy
 Requires-Dist: multiprocess
 Requires-Dist: bottleneck
 Requires-Dist: pandas
@@ -220,6 +220,3 @@ This project is released under the BSD license (see `setup.py` for metadata).
 Author: Alejandro S. Borlaff <a.s.borlaff@nasa.gov>
 
 ---
-
-If you'd like, I can add a short `examples/` notebook or a `requirements.txt` and run a quick sanity test to confirm imports.
-
