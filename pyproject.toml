@@ -16,7 +16,7 @@ classifiers = [
   "License :: OSI Approved :: BSD License",
 ]
 dependencies = [
-  "numpy==1.26.4",
+  "numpy",
   "multiprocess",
   "bottleneck",
   "pandas",
