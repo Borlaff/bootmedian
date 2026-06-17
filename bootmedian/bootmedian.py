@@ -172,7 +172,7 @@ def boot_polyfit(x, y, seed):
         returns the slope and intercept of a bootstrap resampled array_like'''
     index_array = np.linspace(0,len(x)-1,len(x), dtype="int")
     index_resamp = bootstrap_resample(X=index_array, weights=False, seed=seed)
-    m_temp, b_temp = boot_polyfit(x[index_resamp], y[index_resamp])
+    m_temp, b_temp = np.polyfit(x[index_resamp], y[index_resamp],1)
     return(np.array([m_temp, b_temp]))
 
 
